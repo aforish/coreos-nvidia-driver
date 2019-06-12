@@ -1,9 +1,9 @@
-ARG COREOS_VERSION=1800.5.0
+ARG COREOS_VERSION=2079.5.1
 ARG NVIDIA_DRIVER_VERSION=396.44
 ARG NVIDIA_PRODUCT_TYPE=tesla
 ARG NVIDIA_SITE=us.download.nvidia.com/tesla
 
-FROM zazrivec/coreos-developer:${COREOS_VERSION} as BUILD
+FROM bugroger/coreos-developer:${COREOS_VERSION} as BUILD
 LABEL maintainer "Michael Schmidt <michael.j.schmidt@gmail.com>"
 
 ARG COREOS_VERSION
@@ -18,11 +18,13 @@ ENV DRIVER_ARCHIVE=NVIDIA-Linux-x86_64-${NVIDIA_DRIVER_VERSION}
 #
 # In Docker the `/proc` filesystem does not work as expected, so a bit more magic
 # is required. 
+#RUN emerge -gKv bsdtar
+#RUN export tar='bsdtar'
 
 RUN emerge-gitclone
 RUN . /usr/share/coreos/release && \
   git -C /var/lib/portage/coreos-overlay checkout build-${COREOS_RELEASE_VERSION%%.*}
-RUN emerge -gKv coreos-sources > /dev/null
+RUN emerge -gKv coreos-sources
 RUN cp /usr/lib64/modules/$(ls /usr/lib64/modules)/build/.config /usr/src/linux/
 RUN make -C /usr/src/linux modules_prepare
 
